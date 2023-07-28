@@ -42,17 +42,12 @@ struct Tags {
 #[derive(Deserialize, Debug)]
 struct Tag {
     id: Uuid,
-    r#type: String,
     attributes: TagAttributes,
-    relationships: Vec<Relationship>,
 }
 
 #[derive(Deserialize, Debug)]
 struct TagAttributes {
     name: LocalizedString,
-    description: LocalizedString,
-    group: String,
-    version: i32,
 }
 
 #[derive(Deserialize, Debug)]
@@ -136,8 +131,6 @@ pub async fn get_cover_art(manga_id: &Uuid, filename: &str) {
     let base_url = "https://uploads.mangadex.org";
 
     let full_url = format!("{}{}/{}/{}", base_url, "/covers", manga_id, filename);
-
-    println!("{full_url}");
 
     let client = reqwest::Client::new();
     let res = client.get(full_url).send().await.unwrap();
