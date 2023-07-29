@@ -1,11 +1,12 @@
-pub enum SupportedLanguageCode {
+#[derive(Eq, PartialEq, Hash)]
+pub enum SupportedLanguage {
     English,
 }
 
-pub fn get_supported_language_string(
-    supported_language_code: SupportedLanguageCode,
-) -> &'static str {
-    match supported_language_code {
-        SupportedLanguageCode::English => "en",
+impl SupportedLanguage {
+    pub fn get_supported_language_string(&self) -> &'static str {
+        match self {
+            SupportedLanguage::English => "en",
+        }
     }
 }

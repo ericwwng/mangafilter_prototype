@@ -4,7 +4,7 @@ use mangafilter_prototype::*;
 async fn main() -> anyhow::Result<()> {
     let included_tags = vec!["fantasy"];
 
-    let included_tag_ids = get_tag_ids(&included_tags).await;
+    let included_tag_ids = get_tag_ids(&included_tags, common::SupportedLanguage::English).await;
 
     let mangas = get_manga(&included_tag_ids, 2, 0).await;
 
@@ -17,6 +17,9 @@ async fn main() -> anyhow::Result<()> {
             }
         }
     }
+
+    //let mut file = File::create(format!("{}/{}", "test-outputs/covers", filename)).unwrap();
+    //file.write_all(&bytes).unwrap();
 
     Ok(())
 }

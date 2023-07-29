@@ -1,10 +1,8 @@
-use common::get_supported_language_string;
-use common::SupportedLanguageCode;
+use bytes::Bytes;
+use common::SupportedLanguage;
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use serde::Serialize;
-use std::fs::File;
-use std::io::Write;
 use uuid::Uuid;
 
 pub mod common;
@@ -91,7 +89,7 @@ where
     body_map
 }
 
-pub async fn get_tag_ids(included_tags: &Vec<&str>) -> Vec<String> {
+pub async fn get_tag_ids(included_tags: &Vec<&str>, language: SupportedLanguage) -> Vec<String> {
     let body_map: Tags = send_request("/manga/tag", None::<()>).await;
 
     let mut included_tag_ids: Vec<String> = Vec::new();
@@ -100,9 +98,7 @@ pub async fn get_tag_ids(included_tags: &Vec<&str>) -> Vec<String> {
         let en_tag_name = tag
             .attributes
             .name
-            .get(get_supported_language_string(
-                SupportedLanguageCode::English,
-            ))
+            .get(language.get_supported_language_string())
             .unwrap();
 
         for included_tag in included_tags {
@@ -127,7 +123,7 @@ pub async fn get_manga(included_tag_ids: &Vec<String>, limit: i32, offset: i32) 
     body_map
 }
 
-pub async fn get_cover_art(manga_id: &Uuid, filename: &str) {
+pub async fn get_cover_art(manga_id: &Uuid, filename: &str) -> Bytes {
     let base_url = "https://uploads.mangadex.org";
 
     let full_url = format!("{}{}/{}/{}", base_url, "/covers", manga_id, filename);
@@ -136,7 +132,5 @@ pub async fn get_cover_art(manga_id: &Uuid, filename: &str) {
     let res = client.get(full_url).send().await.unwrap();
 
     let bytes = &res.bytes().await.unwrap();
-
-    let mut file = File::create(format!("{}/{}", "test-outputs/covers", filename)).unwrap();
-    file.write_all(&bytes).unwrap();
+    bytes.clone()
 }
