@@ -1,3 +1,4 @@
+use anyhow::Result;
 use bytes::Bytes;
 use common::SupportedLanguage;
 use serde::de::DeserializeOwned;
@@ -64,7 +65,7 @@ pub struct CoverAttributes {
     pub file_name: String,
 }
 
-async fn send_request<T, U>(uri: &str, request_body: Option<U>) -> T
+async fn send_request<T, U>(uri: &str, request_body: Option<U>) -> Result<T>
 where
     T: DeserializeOwned,
     U: Serialize,
@@ -80,17 +81,17 @@ where
         res = res.query(&body);
     }
 
-    let res = res.send().await.unwrap();
+    let res = res.send().await?;
 
-    let out = &res.text().await.unwrap();
+    let out = &res.text().await?;
 
-    let body_map: T = serde_json::from_str(&out).unwrap();
+    let body_map: T = serde_json::from_str(&out)?;
 
-    body_map
+    Ok(body_map)
 }
 
 pub async fn get_tag_ids(included_tags: &Vec<&str>, language: SupportedLanguage) -> Vec<String> {
-    let body_map: Tags = send_request("/manga/tag", None::<()>).await;
+    let body_map: Tags = send_request("/manga/tag", None::<()>).await.unwrap();
 
     let mut included_tag_ids: Vec<String> = Vec::new();
 
@@ -115,11 +116,12 @@ pub async fn get_manga(included_tag_ids: &Vec<String>, limit: i32, offset: i32) 
     let request_content = [
         ("includedTags[]", included_tag_ids.join(",")),
         ("includes[]", "cover_art".to_string()),
+        ("order[rating]", "desc".to_string()),
         ("limit", limit.to_string()),
         ("offset", offset.to_string()),
     ];
 
-    let body_map: MangaList = send_request("/manga", Some(request_content)).await;
+    let body_map: MangaList = send_request("/manga", Some(request_content)).await.unwrap();
     body_map
 }
 

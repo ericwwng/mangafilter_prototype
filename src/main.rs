@@ -8,6 +8,8 @@ async fn main() -> anyhow::Result<()> {
 
     let mangas = get_manga(&included_tag_ids, 2, 0).await;
 
+    println!("{:#?}", &mangas);
+
     for manga in mangas.data {
         for relationship in manga.relationships {
             if relationship.r#type == "cover_art" {
